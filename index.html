@@ -164,11 +164,7 @@
     z-index:50;background:#050505;border:2px solid var(--accent);padding:6px;
     box-shadow:0 12px 30px rgba(0,0,0,.6);
   }
-  .peek .preview img{display:block;width:200px;height:auto}
-  tr[data-type="Bracelet"] .preview img,
-  tr[data-type="Rings"] .preview img,
-  tr[data-type="Ornamental Egg"] .preview img,
-  .peek[data-name="Het Gouden Hondje"] .preview img{width:420px}
+  .peek .preview img{display:block;width:280px;height:280px;object-fit:contain;background:#0a0a0a}
   .peek .preview span{
     display:block;margin-top:5px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
     color:var(--dim);text-align:center;
@@ -184,8 +180,8 @@
   }
   .lightbox.open{display:flex}
   .lightbox img{
-    max-width:min(90vw,720px);max-height:85vh;width:auto;height:auto;
-    border:3px solid var(--accent);box-shadow:0 20px 60px rgba(0,0,0,.7);
+    width:min(90vw,600px);height:min(85vh,600px);object-fit:contain;
+    border:3px solid var(--accent);box-shadow:0 20px 60px rgba(0,0,0,.7);background:#0a0a0a;
   }
   .lightbox figcaption{
     position:absolute;bottom:28px;left:0;right:0;text-align:center;
