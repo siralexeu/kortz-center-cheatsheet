@@ -151,7 +151,8 @@
   .step,.wt{color:var(--dim);font-size:13.5px}
   td.num.step,td.num.wt{text-align:center}
   th.num[data-key="step"],th.num[data-key="weight"]{text-align:center}
-  .name-cell{display:flex;align-items:center;gap:9px}
+  .name-cell{display:flex;align-items:center;gap:9px;white-space:nowrap}
+  .name-cell>*{flex:0 0 auto}
   .peek{
     position:relative;display:inline-flex;align-items:center;justify-content:center;
     width:24px;height:24px;flex:0 0 auto;background:none;border:1px solid var(--line-strong);
@@ -588,7 +589,60 @@ function render(){
 }
 render();
 
-// ---- click-to-fullscreen lightbox (hover preview stays independent) ----
+// ---- lock table + column widths so filtering never changes the layout ----
+// measured once with every row visible, in normal mode — i.e. exactly the width
+// the table had by default before, so the header/footer keep their original size
+function lockLayout(){
+  const table   = document.querySelector("table");
+  const shell   = document.querySelector(".tableshell");
+  const hardBox = document.getElementById("hard");
+  const qBox    = document.getElementById("q");
+  if(!table || !shell) return;
+
+  const prevHard = hardBox.checked, prevType = activeType, prevQ = qBox.value;
+
+  const old = table.querySelector("colgroup");
+  if(old) old.remove();
+  table.style.tableLayout = "auto";
+  table.style.width = "";
+  table.style.minWidth = "";
+  shell.style.width = "";
+
+  const ths = [...table.querySelectorAll("thead th")];
+  const widths = new Array(ths.length).fill(0);
+
+  activeType = "ALL"; qBox.value = ""; hardBox.checked = false;
+  render();
+  // exact sub-pixel widths — rounding each one up and then summing them
+  // inflates the total by a pixel or two
+  ths.forEach((th,i)=>{
+    widths[i] = th.getBoundingClientRect().width;
+  });
+  const tableW = table.getBoundingClientRect().width;
+
+  hardBox.checked = prevHard; activeType = prevType; qBox.value = prevQ;
+
+  const cg = document.createElement("colgroup");
+  widths.forEach(w=>{
+    const c = document.createElement("col");
+    c.style.width = w + "px";
+    cg.appendChild(c);
+  });
+  table.insertBefore(cg, table.firstChild);
+
+  // auto layout on purpose: the colgroup keeps the columns stable across filters,
+  // but a column may still grow if content genuinely needs it — so nothing wraps
+  table.style.tableLayout = "auto";
+  table.style.width = tableW + "px";
+  table.style.minWidth = tableW + "px";
+  shell.style.width = `min(${tableW + 2}px, 100%)`;
+
+  render();
+}
+
+// wait for the webfonts, otherwise the measurement is done with fallback metrics
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(lockLayout);
+else window.addEventListener("load", lockLayout);
 const lightbox=document.getElementById("lightbox");
 const lbImg=document.getElementById("lbImg");
 const lbCaption=document.getElementById("lbCaption");
